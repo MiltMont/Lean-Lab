@@ -1,0 +1,9 @@
+# Lake build artifacts (large; regenerate with `lake build`)
+/.lake/
+
+# NOTE: lake-manifest.json IS committed — it pins exact dependency revisions,
+# which is what makes the build reproducible across machines.
+
+# Editor / OS noise
+.DS_Store
+*.swp

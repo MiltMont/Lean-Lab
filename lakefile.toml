@@ -1,0 +1,29 @@
+name = "leanlab"
+defaultTargets = ["LeanLab", "SmokeTest"]
+version = "0.1.0"
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+warningAsError = false
+
+# Mathlib pinned to the release matching the toolchain above.
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.35.0"
+
+# Shared core: definitions and lemmas reused across research directions.
+[[lean_lib]]
+name = "LeanLab"
+srcDir = "."
+globs = ["LeanLab", "LeanLab.*"]
+
+[[lean_lib]]
+name = "SmokeTest"
+srcDir = "directions/SmokeTest/lean"
+globs = ["SmokeTest", "SmokeTest.*"]
+
+# Research directions: one lean_lib each.
+# Create new ones with scripts/new-direction.sh
