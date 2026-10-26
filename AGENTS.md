@@ -265,9 +265,9 @@ formalising it as true.
 
 ## 6. Commands
 
-```bash
-cd /home/delfos/Documents/lean-lab
+Run from the repository root:
 
+```bash
 lake build                    # build everything
 lake build LeanLab            # build one library
 lake build Foo                # build direction Foo

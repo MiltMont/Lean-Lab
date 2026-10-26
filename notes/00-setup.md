@@ -24,7 +24,7 @@ lean-lsp:
   command: "uvx"
   args: ["lean-lsp-mcp"]
   env:
-    LEAN_PROJECT_PATH: "/home/delfos/Documents/lean-lab"
+    LEAN_PROJECT_PATH: "/path/to/lean-lab"   # absolute path of your clone
     LEAN_LOG_LEVEL: "WARNING"
     LEAN_MCP_INSTRUCTIONS: "..."
   timeout: 300
@@ -60,6 +60,8 @@ Tools are exposed to the agent as `mcp_lean_lsp_<tool>`.
   startup is fast.
 - `ripgrep` is installed at `/usr/bin/rg`, which `lean_local_search` and the
   `lean_verify` source scan require.
-- Mathlib's olean cache lives at `~/.cache/mathlib` (35456 `.ltar` files) and
+- Mathlib's olean cache lives at `~/.cache/mathlib` (about 2.2 GB on disk) and
   is shared across projects.
-- A full `.lake/` for one project is roughly 7.3 GB.
+- A full `.lake/` for one project is about 1.2 GB on disk (about 7 GB apparent
+  size — `du -sh` vs `du -sh --apparent-size`; most of it is Mathlib's build
+  output under `.lake/packages/mathlib/.lake`).

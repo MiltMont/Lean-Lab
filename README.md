@@ -10,10 +10,35 @@ Agents working here should read **[AGENTS.md](AGENTS.md)** first — it covers
 the module-system file shape, the MCP tool signatures, the formalisation
 workflow, and the error messages that bite.
 
+## Install
+
+1. **Lean** — install `elan` (the Lean toolchain manager) by following
+   <https://lean-lang.org/install/> (or the manual route at
+   <https://github.com/leanprover/elan>). Do not install Lean from a system
+   package manager: `elan` reads `lean-toolchain` and fetches the exact
+   version this project pins.
+2. **Clone and build**:
+
+   ```bash
+   git clone <this-repo-url> lean-lab
+   cd lean-lab
+   lake exe cache get    # download prebuilt Mathlib (~2 GB); skips hours of compiling
+   lake build            # build every direction
+   ```
+
+3. **Agent tooling (optional)** — for MCP-driven work, set up
+   [lean-lsp-mcp](https://github.com/oOo0oOo/lean-lsp-mcp) following its
+   README: install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+   and [ripgrep](https://github.com/BurntSushi/ripgrep#installation), then
+   register `uvx lean-lsp-mcp` with your MCP client. Set
+   `LEAN_PROJECT_PATH` to wherever you cloned this repo. Tested with
+   `lean-lsp-mcp` 0.31.0; see [notes/00-setup.md](notes/00-setup.md).
+
 ## Quick start
 
+From the repository root:
+
 ```bash
-cd /home/delfos/Documents/lean-lab
 lake build                    # build every direction
 ./scripts/new-direction.sh MyTopic
 lake build MyTopic
