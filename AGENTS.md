@@ -17,8 +17,9 @@ the written record in sync with the code.
    `lean_verify` with only `propext`, `Classical.choice`, `Quot.sound` in its
    axiom set. `sorryAx` means "not finished".
 3. **Record what you learned.** A direction's `notes/` directory is the
-   research log: the informal statement, the formal statement, the plan, and
-   a dated progress log. If you discover that a claim is *false*, that is a
+   research log, written in Typst (see §9): the human's informal statement
+   (`idea.typ`), and your readings, Lean links, questions and dated progress
+   log (`formal.typ`). If you discover that a claim is *false*, that is a
    result — write the counterexample down.
 4. **State the informal claim before formalising it.** If the informal text is
    ambiguous, resolve the ambiguity explicitly in the notes, state the
@@ -34,10 +35,13 @@ lean-lab/
 ├── LeanLab/                  Shared core library (common vocabulary)
 ├── directions/<Name>/        One research direction
 │   ├── lean/<Name>/          Lean sources for that direction
-│   └── notes/                Informal statement + progress log (markdown)
+│   └── notes/                main.typ + idea.typ (human) + formal.typ (agent)
 ├── notes/                    Project-level notes, cross-cutting questions
+│   ├── template/lab.typ      Typst note template (mousse-notes + Lean links)
+│   └── status.json           Generated Lean status for #lean links
 ├── references/               Papers, notes, external material
-└── scripts/new-direction.sh  Scaffold a new direction
+├── scripts/new-direction.sh  Scaffold a new direction
+└── scripts/notes.py          Check #lean links, regenerate status, build PDFs
 ```
 
 - `LeanLab/` holds only definitions and lemmas reused by more than one
@@ -56,6 +60,7 @@ lean-lab/
 | Mathlib | `v4.35.0` (pinned in `lakefile.toml`) |
 | Build | `lake build` / `lake build <Target>` |
 | MCP server | `lean-lsp` (lean-lsp-mcp 0.31.0), stdio transport |
+| Typst | `0.15.1`, notes use `@preview/mousse-notes:2.0.1` |
 
 `lakefile.toml` sets `autoImplicit = false` and `relaxedAutoImplicit = false`,
 so **every variable and hypothesis must be declared explicitly**. If Lean
@@ -198,8 +203,10 @@ result is already in Mathlib source, and space out external calls.
 Follow these phases. Do not skip to writing a proof term.
 
 **Phase 1 — Read the idea.**
-Read the informal claim (in `notes/` or from the user). List its ambiguities.
-Decide the *reading* you will formalise. Write it down.
+Read the informal claim (in `directions/<Name>/notes/idea.typ` or from the
+user). List its ambiguities. Decide the *reading* you will formalise and
+record it as a `#reading[...]` in `formal.typ`; anything only the human can
+settle goes in a `#question[...]` (see §9).
 
 **Phase 2 — Find the right abstraction.**
 Do not formalise the most specific version you can think of. Look for the
@@ -243,6 +250,8 @@ formalising it as true.
 - `lean_verify` on every finished theorem: axiom set must be exactly
   `propext`, `Classical.choice`, `Quot.sound` (or a subset).
 - `lake build` clean.
+- Link the theorem from `formal.typ` with `#lean("...", claim: <label>)` and
+  run `scripts/notes.py`; every link must report `proved` (or `refuted`).
 - Update the direction's progress log with what was proved, what was refuted,
   and what is still open.
 
@@ -256,11 +265,11 @@ formalising it as true.
 - Prefer explicit binders: `theorem foo {α : Type*} (h : p α) : q α`.
 - Mark `variable`s at the top of a file or section rather than repeating them.
 - Cross-reference notes in Lean via doc comments, e.g.
-  `--! See notes/00-statement.md`.
+  `--! See notes/formal.typ, <thm_foo>`.
 - Keep `autoImplicit` off means every identifier is visible in the signature;
   prefer that.
-- Put the direction's informal statement and plan in
-  `directions/<Name>/notes/00-statement.md`, and append a dated line to the
+- Put the direction's formal plan, readings and questions in
+  `directions/<Name>/notes/formal.typ`, and append a dated line to its
   progress log every time you change the formalisation.
 
 ## 6. Commands
@@ -273,6 +282,10 @@ lake build LeanLab            # build one library
 lake build Foo                # build direction Foo
 lake env lean LeanLab/Basic.lean   # check one file
 lake clean                    # nuke build artifacts (rarely needed)
+
+scripts/notes.py              # check #lean links, write notes/status.json, build PDFs
+scripts/notes.py --check      # fail if notes/status.json is stale (CI)
+typst compile --root . directions/Foo/notes/main.typ   # one direction's PDF
 ```
 
 Prefer the MCP tools over shelling out for iteration — they reuse a warm
@@ -325,9 +338,58 @@ messages, not hypotheticals.
 
 | Need | Location |
 |---|---|
-| Informal statement of a direction | `directions/<Name>/notes/00-statement.md` |
+| Informal statement of a direction (human) | `directions/<Name>/notes/idea.typ` |
+| Readings, questions, progress log (agent) | `directions/<Name>/notes/formal.typ` |
+| Note template and helpers | `notes/template/lab.typ` |
 | Lean code for a direction | `directions/<Name>/lean/<Name>/` |
 | Shared definitions | `LeanLab/` |
 | Cross-cutting questions | `notes/` |
 | External papers/notes | `references/` |
 | New direction scaffold | `scripts/new-direction.sh` |
+
+## 9. Typst notes
+
+Each direction's notes are Typst, built on the `mousse-notes` package via
+`notes/template/lab.typ`. Humans write the mathematics; agents read it and
+write the formal side in the same format.
+
+| File | Author | Contents |
+|---|---|---|
+| `notes/main.typ` | either | `#show: lab.with(title: ...)`, then `#include`s |
+| `notes/idea.typ` | **human only** | Informal claims, intuition, references |
+| `notes/formal.typ` | agent | Readings, Lean links, questions, progress log |
+
+**Agents never edit `idea.typ`.** If a human claim looks wrong or ambiguous,
+say so in `formal.typ` with a `#reading` or `#question`, not by rewriting it.
+
+Every note starts with `#import "/notes/template/lab.typ": *` (the leading
+`/` is the repository root, so always compile with `--root .`). Available:
+
+- Environments from mousse-notes: `theorem`, `proposition`, `lemma`,
+  `corollary`, `definition`, `proof`, `example`, `solution`, `remark`. Each
+  takes `name:` and a trailing label, e.g.
+  `#theorem(name: "Foo")[...] <thm_foo>`. Add `$qed$` to proofs yourself.
+- `#lean("LeanLab.Dir.decl", claim: <thm_foo>)` — links a claim to the Lean
+  declaration that formalises it. Use `refutes: true` when the declaration
+  proves the claim's *negation*. The status tag (`proved`, `sorry`,
+  `axioms`, `missing`, `refuted`, `unchecked`) comes from
+  `notes/status.json`, which **only `scripts/notes.py` writes** — never edit
+  it by hand.
+- `#reading[...]` — the interpretation you chose for an ambiguous claim.
+- `#question[...]` — something only the human can decide. The human answers
+  with `answer: [...]`; do not answer your own questions.
+
+Labels: `<thm_…>`, `<lem_…>`, `<def_…>`, `<prop_…>`, `<cor_…>`, `<ex_…>`, in
+snake_case, stable once written (other files and status links refer to them).
+Do not add Typst packages beyond `mousse-notes`.
+
+Machine-readable queries (Typst 0.15 deprecates `typst query`; use `eval`):
+
+```bash
+typst eval 'query(<lean>).map(it => it.value)'     --in directions/Foo/notes/main.typ --root .
+typst eval 'query(<question>).map(it => it.value)' --in directions/Foo/notes/main.typ --root .
+```
+
+Done means: `scripts/notes.py` exits 0 (every link `proved`/`refuted`,
+every note compiles), and `notes/status.json` is committed alongside the
+Lean change.

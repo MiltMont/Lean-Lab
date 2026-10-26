@@ -1,6 +1,9 @@
 # Lake build artifacts (large; regenerate with `lake build`)
 /.lake/
 
+# Compiled notes (regenerate with `scripts/notes.py`)
+/directions/*/notes/*.pdf
+
 # NOTE: lake-manifest.json IS committed — it pins exact dependency revisions,
 # which is what makes the build reproducible across machines.
 

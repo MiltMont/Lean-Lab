@@ -11,7 +11,8 @@ Verifies that the toolchain, Mathlib and the build pipeline work end to end:
 imports from Mathlib, a `public` declaration reachable through the root
 module, and a real proof with no `sorry`.
 
-Delete this direction once a real research direction exists.
+This direction is a permanent canary: keep it. If it stops compiling, the
+environment broke, not the mathematics.
 -/
 
 public section

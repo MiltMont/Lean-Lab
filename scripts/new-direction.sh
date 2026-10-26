@@ -6,7 +6,9 @@
 # Creates:
 #   directions/<Name>/lean/<Name>.lean        (root module)
 #   directions/<Name>/lean/<Name>/Basic.lean   (direction sources)
-#   directions/<Name>/notes/00-statement.md    (informal statement + log)
+#   directions/<Name>/notes/main.typ           (Typst notes entry point)
+#   directions/<Name>/notes/idea.typ           (human: informal statement)
+#   directions/<Name>/notes/formal.typ         (agent: readings, links, log)
 #
 # and registers the library in lakefile.toml (including defaultTargets, so
 # that a bare `lake build` compiles every direction).
@@ -67,18 +69,38 @@ namespace LeanLab.$DIR
 end LeanLab.$DIR
 EOF
 
-cat > "directions/$DIR/notes/00-statement.md" <<EOF
-# $DIR
+cat > "directions/$DIR/notes/main.typ" <<EOF
+#import "/notes/template/lab.typ": *
 
-## Problem (informal)
+#show: lab.with(title: "$DIR")
 
-_TODO: state the research question in plain language._
+// idea.typ: written by humans. formal.typ: written by agents.
+#include "idea.typ"
+#include "formal.typ"
+EOF
 
-## Formalisation plan
+cat > "directions/$DIR/notes/idea.typ" <<EOF
+#import "/notes/template/lab.typ": *
 
-_TODO: which Lean definitions and lemmas will capture this statement?_
+// Human-written. Agents read this file but do not edit it.
 
-## Progress log
+= Idea
+
+// TODO: state the research question in plain language. Label each claim,
+// e.g. #theorem(name: "...")[...] <thm_name>
+EOF
+
+cat > "directions/$DIR/notes/formal.typ" <<EOF
+#import "/notes/template/lab.typ": *
+
+// Agent-written. Formal statements, readings, questions and the progress log.
+
+= Formalisation
+
+// Readings (#reading), Lean links (#lean("LeanLab.$DIR.decl", claim: <label>))
+// and questions for the human (#question) go here.
+
+== Progress log
 
 - $(date +%Y-%m-%d): direction created.
 EOF
@@ -129,9 +151,12 @@ Created direction '$DIR':
 
   directions/$DIR/lean/$DIR.lean
   directions/$DIR/lean/$DIR/Basic.lean
-  directions/$DIR/notes/00-statement.md
+  directions/$DIR/notes/main.typ
+  directions/$DIR/notes/idea.typ
+  directions/$DIR/notes/formal.typ
 
 Registered in lakefile.toml (defaultTargets updated). Build with:
 
   lake build $DIR
+  typst compile --root . directions/$DIR/notes/main.typ
 EOF

@@ -1,0 +1,10 @@
+{
+  "LeanLab.SmokeTest.sq_nonneg": {
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "status": "proved"
+  }
+}

@@ -33,6 +33,9 @@ workflow, and the error messages that bite.
    register `uvx lean-lsp-mcp` with your MCP client. Set
    `LEAN_PROJECT_PATH` to wherever you cloned this repo. Tested with
    `lean-lsp-mcp` 0.31.0; see [notes/00-setup.md](notes/00-setup.md).
+4. **Notes** — install [Typst](https://github.com/typst/typst#installation)
+   (tested with 0.15.1) and Python 3.11+ for `scripts/notes.py`. The
+   `mousse-notes` package is downloaded automatically on first compile.
 
 ## Quick start
 
@@ -40,6 +43,7 @@ From the repository root:
 
 ```bash
 lake build                    # build every direction
+scripts/notes.py              # check Lean links in the notes, build note PDFs
 ./scripts/new-direction.sh MyTopic
 lake build MyTopic
 ```
@@ -52,10 +56,15 @@ LeanLab.lean              root module for the shared core
 directions/<Name>/        one research direction
   lean/<Name>.lean        root module
   lean/<Name>/            Lean sources
-  notes/00-statement.md   informal statement, plan, progress log
+  notes/main.typ          Typst notes entry point
+  notes/idea.typ          informal statement (written by humans)
+  notes/formal.typ        readings, Lean links, questions, log (agents)
 notes/                    project-level notes
+  template/lab.typ        Typst note template
+  status.json             generated Lean status of linked claims
 references/               papers and external material
 scripts/new-direction.sh  scaffold a new direction
+scripts/notes.py          sync notes with Lean, compile PDFs
 ```
 
 `LeanLab/` holds only what more than one direction uses. Everything
@@ -76,8 +85,10 @@ accidental reliance on guessed implicit arguments, which is the usual reason
 a formalisation diverges from the informal claim.
 
 **Notes live next to the code.** Each direction carries its informal
-statement and a dated progress log. A refuted claim is a result and gets
-recorded too.
+statement and a dated progress log, in Typst. Humans write `idea.typ`;
+agents write `formal.typ` in the same format and link each claim to its
+Lean declaration with `#lean(...)`, whose status `scripts/notes.py` derives
+from Lean itself. A refuted claim is a result and gets recorded too.
 
 ## Verification
 
